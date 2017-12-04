@@ -11,23 +11,16 @@ import MapKit
 
 class MovieLocationViewController: UIViewController {
 
-    @IBOutlet weak var mapV: MKMapView!
-    
-    @IBAction func backClicked(_ sender: Any) {
-        
-        self.dismiss(animated: true, completion: nil )
-    }
     public var titleLabel = "MovieTitle"
     public var locationAddress = "Address"
     
-    var searchCompleter = MKLocalSearchCompleter()
-    var searchResults = [MKLocalSearchCompletion]()
- 
+    @IBOutlet weak var mapV: MKMapView!
+    @IBAction func backClicked(_ sender: Any) {
+        self.dismiss(animated: true, completion: nil )
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        searchCompleter.delegate = self
-        searchCompleter.queryFragment = locationAddress
         setLocation()
 //        Then handle the results of the query using the MKLocalSearchCompleterDelegate:
         // Do any additional setup after loading the view.
@@ -53,7 +46,7 @@ class MovieLocationViewController: UIViewController {
     
     func setLocation(){
         
-        let location = locationAddress + ", San Francisco" + ",CA" + ", 94120"
+        let location = locationAddress + Constants.city + Constants.state + Constants.zip// ", San Francisco" + ",CA" + ", 94120"
         let geocoder = CLGeocoder()
         geocoder.geocodeAddressString(location) { [weak self] placemarks, error in
             if let placemark = placemarks?.first, let location = placemark.location {
@@ -63,8 +56,6 @@ class MovieLocationViewController: UIViewController {
                     region.center = location.coordinate
                     region.span.longitudeDelta /= 8.0
                     region.span.latitudeDelta /= 8.0
-                    
- 
                     self?.mapV.setRegion(region, animated: true)
                     self?.mapV.addAnnotation(mark)
                 }
@@ -100,14 +91,3 @@ class MovieLocationViewController: UIViewController {
 }
 
 
-extension MovieLocationViewController: MKLocalSearchCompleterDelegate {
-    
-    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
-        searchResults = completer.results
-       // searchResultsTableView.reloadData()
-    }
-    
-    func completer(completer: MKLocalSearchCompleter, didFailWithError error: NSError) {
-        // handle error
-    }
-}

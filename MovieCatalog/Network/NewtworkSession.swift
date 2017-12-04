@@ -13,41 +13,10 @@ let notificationDataDownload = "NotificationDataDownload"
 class NewtworkSession: NSObject {
 
     var dataArray = Array<Any>()
+    var dataArrayOnlyMovieNames = Array<Any>()
+    var movieLocationDictionary = Dictionary<String, Array<String>>()
     
-    func download_request(urlToRequest:String )
-    {
-        let url:URL = URL(string: urlToRequest)!
-        let session = URLSession.shared
-        
-        var request =  URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringCacheData
  
-//        let paramString = "data=Hello"
-//        request.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)
- 
-        let task = session.downloadTask(with: request) {
-            (  location,   response,   error) in
-            
-            guard let _:URL = location, let _:URLResponse = response, error == nil else {
-                print("error")
-                return
-            }
-            
-            let urlContents = try! String(contentsOf: location!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))
-            
-            guard let _:String = urlContents else {
-                print("error")
-                return
-            }
-            
-            print(urlContents)
-            
-        }
-        
-        task.resume()
-        
-    }
 
     func dataRequest(urltoRequest:String)
     {
@@ -67,8 +36,6 @@ class NewtworkSession: NSObject {
                 return
             }
             
-          ////  NotificationCenter.default.post(name: Notification.Name(notificationDataDownload), object: nil, userInfo: nil )
-            
             let dataString = NSString(data: data!, encoding: String.Encoding.utf8.rawValue)
             print(dataString ?? "default string if string empty")
             
@@ -77,7 +44,6 @@ class NewtworkSession: NSObject {
                 // Convert NSData to Dictionary where keys are of type String, and values are of any type
                 let json = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.mutableContainers) as! Dictionary<String, Any> // [String:Any]
                 // Access specific key with value of type String
-                //let str = json["key"] as! String
                 
                 let meta = json["meta"]
                 let metaArr = meta as?  Array<Any >
@@ -88,16 +54,21 @@ class NewtworkSession: NSObject {
                 guard let dArr = dataArr else{return}
                
                 for (_, element ) in (dArr.enumerated()){
-
-                    
                     self.dataArray.append(element)
                 }
+//                var lastElement = self.dataArray[0]
+//                for (index, element) in (self.dataArray.enumerated()){
+//                    if let movieName= 
+//                    self.movieLocationDictionary.[element[]]
+//                    
+//                }
+                
+                CoreDataManager.sharedInstance.updateCoreData(inpData: self.dataArray) //
             } catch {
                 // Something went wrong
+                print("JSON could not be parsed")
             }
-            
-            
-            NotificationCenter.default.post(name: Notification.Name(notificationDataDownload), object: nil, userInfo: nil )
+            NotificationCenter.default.post(name: Notification.Name(notificationDataDownload), object: nil, userInfo: ["JSONArray": self.dataArray] )
         }
         
         task.resume()

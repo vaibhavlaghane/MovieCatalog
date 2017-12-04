@@ -11,5 +11,8 @@ import UIKit
 struct  Constants {
 
     static let locationSegueIdentifier           = "LocationSegue"
+    static let city     = ", San Francisco"
+    static let state    =      ",CA"
+    static let zip      =       ", 94120"
     
 }

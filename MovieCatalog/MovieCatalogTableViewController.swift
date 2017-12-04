@@ -7,12 +7,33 @@
 //
 
 import UIKit
+import CoreData
+
 let url = "https://data.sfgov.org/api/views/yitu-d5am/rows.json?accessType=DOWNLOAD"
+
 class MovieCatalogTableViewController: UITableViewController {
  
     var catalogArray = Array<Any>()
     let urlsession = NewtworkSession()
     
+    var fetchedResultsController: NSFetchedResultsController<NSFetchRequestResult>!
+    
+    func initializeFetchedResultsController() {
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Person")
+        let departmentSort = NSSortDescriptor(key: "department.name", ascending: true)
+        let lastNameSort = NSSortDescriptor(key: "lastName", ascending: true)
+        request.sortDescriptors = [departmentSort, lastNameSort]
+        
+        let moc =  CoreDataManager.sharedInstance.persistentContainer.newBackgroundContext()// .managedObjectContext
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: request, managedObjectContext: moc, sectionNameKeyPath: nil, cacheName: nil)
+        fetchedResultsController.delegate = self as? NSFetchedResultsControllerDelegate
+        
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            fatalError("Failed to initialize FetchedResultsController: \(error)")
+        }
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -28,14 +49,10 @@ class MovieCatalogTableViewController: UITableViewController {
         self.tableView.estimatedRowHeight = 44
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
-        
-        
         urlsession.dataRequest(urltoRequest: url )
     }
     
-    
     @objc func updateDataCatalog(){
-        
         catalogArray = urlsession.dataArray
         DispatchQueue.main.async {
             self.tableView.reloadData()
@@ -76,55 +93,16 @@ class MovieCatalogTableViewController: UITableViewController {
             let location = catalogDetails[10] as? String
             
             if(movieName != nil &&  !(movieName?.isEmpty)! ){
-                
                 cell.cellLabel.text = movieName
-               
             }
             if( location != nil && !(location?.isEmpty)!){
-                
                  cell.location.text = location
             }
         }
         
         
     }
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    
+  
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
