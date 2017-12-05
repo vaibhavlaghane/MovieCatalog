@@ -9,6 +9,7 @@
 import UIKit
 import MapKit
 
+//Location controller 
 class MovieLocationViewController: UIViewController {
 
     public var titleLabel = "MovieTitle"

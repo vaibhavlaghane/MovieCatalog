@@ -13,11 +13,13 @@ let url = "https://data.sfgov.org/api/views/yitu-d5am/rows.json?accessType=DOWNL
 
 class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsControllerDelegate {
  
+
     var catalogArray = Array<Any>()
     let urlsession = NewtworkSession()
     var fetchDataArray = Array<Any >()
     let context = CoreDataManager.sharedInstance.persistentContainer.viewContext
     var fetchedResultsController: NSFetchedResultsController<NSFetchRequestResult>!
+    var sortOrder = false
     
     func initializeFetchedResultsController() {
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: movieEntity)
@@ -39,6 +41,36 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
         }
     }
     
+    
+    @IBAction func sortButtonClicked(_ sender: Any) {
+        var   tempA = catalogArray as? [MovieDetails]
+        var tempB = Array<MovieDetails>()
+        
+        if tempA != nil && tempA?.count != 0 {
+            for (index, element ) in (tempA?.enumerated())! {
+                
+                if (tempA?.count)! > index {
+                    if element.movieName != nil{
+                        tempB.append(element)
+                    }
+                }
+            }
+            if(sortOrder){
+            catalogArray = tempB.sorted {$0.movieName!.localizedStandardCompare($1.movieName!) == .orderedAscending}
+                sortOrder = false
+            }else{
+                catalogArray = tempB.sorted {$0.movieName!.localizedStandardCompare($1.movieName!) == .orderedDescending}
+                sortOrder = true
+                
+            }
+            
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
+    }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -49,35 +81,31 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
             selector: #selector(updateDataCatalog),
             name: NSNotification.Name(rawValue: Constants.notificationCoreDataUpdated),
             object: nil)
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
         self.tableView.rowHeight = UITableViewAutomaticDimension
         self.tableView.estimatedRowHeight = 44
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
         urlsession.dataRequest(urltoRequest: url )
     }
     
     @objc func updateDataCatalog(){
+        
         catalogArray = urlsession.dataArray
+        
         do {
             try fetchedResultsController.performFetch()
         } catch {
             fatalError("Failed to initialize FetchedResultsController: \(error)")
         }
-        fetchDataArray = CoreDataManager.sharedInstance.fetchDataMovies()
         
+        fetchDataArray = CoreDataManager.sharedInstance.fetchDataMovies()
         catalogArray = self.fetchedResultsController.fetchedObjects!
+        
         if catalogArray.count == 0 {
             catalogArray = fetchDataArray
         }
         if catalogArray.count == 0{
-            
             catalogArray = urlsession.dataArray
         }
 
-        
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
@@ -116,19 +144,28 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
                 catalogArray = fetchDataArray
             }
             if catalogArray.count == 0{
-                
                 catalogArray = urlsession.dataArray
             }
         
-            let  catalogDetails = catalogArray[index] as! MovieDetails
+        var  movieName = ""
+        var  location = ""
+        if  let  catalogDetails = catalogArray[index] as? MovieDetails{
+            if let  movie  = catalogDetails.movieName {movieName = movie }
+            if let locate = catalogDetails.location { location = locate}
+        }
+        if let catalogDetails = catalogArray[index] as? Array<Any>
+        {
+            if let  movie   = (catalogDetails[8] as? String){movieName = movie }
+           if let locate =  (catalogDetails[10] as? String) { location = locate}
+
+        }
+     
+
         
-            let movieName = catalogDetails.movieName
-            let location = catalogDetails.location
-            
-            if(movieName != nil &&  !(movieName?.isEmpty)! ){
+        if(movieName != nil &&  !(movieName.isEmpty) ){
                 cell.cellLabel.text = movieName
             }
-            if( location != nil && !(location?.isEmpty)!){
+        if( location != nil && !(location.isEmpty)){
                  cell.location.text = location
             }
         

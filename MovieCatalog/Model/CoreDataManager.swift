@@ -28,6 +28,7 @@ class   MovieCatalog: NSObject {
     
 }
 
+//coredata manager
 class CoreDataManager: NSObject {
 
     static let sharedInstance = CoreDataManager()
@@ -177,15 +178,6 @@ class CoreDataManager: NSObject {
         return container
     }()
     
-    //get context
-    
-    func getContext()->NSManagedObjectContext{
-        return persistentContainer.viewContext
-    }
-    
-    // MARK: - Core Data Saving support
-    
-    
     // MARK: - Core Data Saving support
     
     func saveContext () {
@@ -218,9 +210,8 @@ class CoreDataManager: NSObject {
                 if exists != nil  {context.delete(element)}
                 }
             } catch {
-                
+                print(" element could not be deleted ")
             }
-           // [childContext existingObjectWithID:project.objectID error:&error], @"");
           persistentContainer.performBackgroundTask { context in
                 do {
                     if element.managedObjectContext == context{
@@ -229,7 +220,7 @@ class CoreDataManager: NSObject {
                     
                     }
                 } catch {
-                
+                print(" element could not be deleted ")
                 }
                 //context.delete(element)
             }

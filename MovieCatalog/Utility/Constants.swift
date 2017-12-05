@@ -8,6 +8,7 @@
 
 import UIKit
 
+//constants to be used acrossed all files 
 struct  Constants {
 
     static let locationSegueIdentifier           = "LocationSegue"
