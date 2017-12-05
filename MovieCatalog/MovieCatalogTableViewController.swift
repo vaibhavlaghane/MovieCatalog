@@ -43,7 +43,7 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
     
     
     @IBAction func sortButtonClicked(_ sender: Any) {
-        var   tempA = catalogArray as? [MovieDetails]
+        let   tempA = catalogArray as? [MovieDetails]
         var tempB = Array<MovieDetails>()
         
         if tempA != nil && tempA?.count != 0 {
