@@ -15,16 +15,17 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
  
     var catalogArray = Array<Any>()
     let urlsession = NewtworkSession()
-    
+    var fetchDataArray = Array<Any >()
+    let context = CoreDataManager.sharedInstance.persistentContainer.viewContext
     var fetchedResultsController: NSFetchedResultsController<NSFetchRequestResult>!
     
     func initializeFetchedResultsController() {
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: movieEntity)
         let movieName = NSSortDescriptor(key: "movieName", ascending: true)
-        //let lastNameSort = NSSortDescriptor(key: "lastName", ascending: true)
+         
         request.sortDescriptors = [movieName]
         
-        let moc =  CoreDataManager.sharedInstance.persistentContainer.viewContext//newBackgroundContext()// .managedObjectContext
+        let moc = context
         let privateMOC = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         privateMOC.parent  = moc
         
@@ -65,6 +66,17 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
         } catch {
             fatalError("Failed to initialize FetchedResultsController: \(error)")
         }
+        fetchDataArray = CoreDataManager.sharedInstance.fetchDataMovies()
+        
+        catalogArray = self.fetchedResultsController.fetchedObjects!
+        if catalogArray.count == 0 {
+            catalogArray = fetchDataArray
+        }
+        if catalogArray.count == 0{
+            
+            catalogArray = urlsession.dataArray
+        }
+
         
         DispatchQueue.main.async {
             self.tableView.reloadData()
@@ -85,8 +97,8 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        let size =  self.fetchedResultsController.fetchedObjects?.count //catalogArray.count
-        return size!
+        let size =  catalogArray.count //self.fetchedResultsController.fetchedObjects?.count //
+        return size
     }
  
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -98,15 +110,20 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
     }
    
     func processCell(index: Int, cell: MovieCatalogCell){
- 
-        if self.fetchedResultsController.fetchedObjects!.count > 0{
-       // if (catalogArray.count > 0 && index < catalogArray.count){
-            
+  
             catalogArray = self.fetchedResultsController.fetchedObjects!
-            var  catalogDetails = catalogArray[index] as! MovieDetails//as! Array<Any>
-            //catalogDetails = self.fetchedResultsController[index]
-            let movieName = catalogDetails.movieName// ["movieName" ]//  catalogDetails[8] as? String
-            let location = catalogDetails.location//["location"]//[10] as? String
+            if catalogArray.count == 0 {
+                catalogArray = fetchDataArray
+            }
+            if catalogArray.count == 0{
+                
+                catalogArray = urlsession.dataArray
+            }
+        
+            let  catalogDetails = catalogArray[index] as! MovieDetails
+        
+            let movieName = catalogDetails.movieName
+            let location = catalogDetails.location
             
             if(movieName != nil &&  !(movieName?.isEmpty)! ){
                 cell.cellLabel.text = movieName
@@ -114,7 +131,7 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
             if( location != nil && !(location?.isEmpty)!){
                  cell.location.text = location
             }
-        }
+        
     }
   
      func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
