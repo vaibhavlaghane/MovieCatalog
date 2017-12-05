@@ -24,7 +24,7 @@ extension MovieDetails {
     @NSManaged public var longitude: Float
     @NSManaged public var movieName: String?
     @NSManaged public var state: String?
-    @NSManaged public var yearRelease: Int16
+    @NSManaged public var yearRelease: String?
     @NSManaged public var zip: String?
 
 }

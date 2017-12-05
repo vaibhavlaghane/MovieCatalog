@@ -42,10 +42,10 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
                 }
             }
             if(sortOrder){
-            catalogArray = tempB.sorted {$0.movieName!.localizedStandardCompare($1.movieName!) == .orderedAscending}
+                movieDArray.sort()
                 sortOrder = false
-            }else{
-                catalogArray = tempB.sorted {$0.movieName!.localizedStandardCompare($1.movieName!) == .orderedDescending}
+            }else{ 
+                movieDArray.reverse()
                 sortOrder = true
             }
             
@@ -81,7 +81,7 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
         // #warning Incomplete implementation, return the number of sections
         //return 1
         
-         return movieDict.count
+         return movieDArray.count//movieDict.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -222,7 +222,9 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
                     }
                 }
             }
-           movieDArray = Array( movieDict.keys)
+           
+            movieDArray = Array( movieDict.keys)
+            movieDArray.sort()
         }
     }
     

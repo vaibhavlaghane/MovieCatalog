@@ -23,7 +23,7 @@ class   MovieCatalog: NSObject {
     public var longitude: Float = 0.0
     public var movieName: String?
     public var state: String? = ""
-    public var yearRelease: Int16 = 0
+    public var yearRelease: String? = "_/_"
     public var zip: String? = ""
     
 }
@@ -46,14 +46,14 @@ class CoreDataManager: NSObject {
                 let movie = MovieCatalog()
                 let catalogDetails = element  as! Array<Any>
                 let location = catalogDetails[10] as? String
-                let date = catalogDetails[9] as? Int
+                let date = catalogDetails[9] as? String
                 
                 if let id = catalogDetails[1] as? String, let movieName = catalogDetails[8] as? String
                 {
                     movie.id = id
                     movie.movieName = movieName
                     movie.location = location ?? ""
-                    movie.yearRelease = Int16(date ?? 0)
+                    movie.yearRelease =  date ?? "0"
                     self.saveEntity(movie: movie, context:privateMOC)
                 }
             }
