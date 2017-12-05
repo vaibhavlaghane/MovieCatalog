@@ -46,12 +46,14 @@ class CoreDataManager: NSObject {
                 let movie = MovieCatalog()
                 let catalogDetails = element  as! Array<Any>
                 let location = catalogDetails[10] as? String
+                let date = catalogDetails[9] as? Int
                 
                 if let id = catalogDetails[1] as? String, let movieName = catalogDetails[8] as? String
                 {
                     movie.id = id
                     movie.movieName = movieName
                     movie.location = location ?? ""
+                    movie.yearRelease = Int16(date ?? 0)
                     self.saveEntity(movie: movie, context:privateMOC)
                 }
             }
@@ -97,6 +99,7 @@ class CoreDataManager: NSObject {
         movieE.setValue(movie.state, forKey: "state")
         movieE.setValue(movie.zip, forKey: "zip")
         movieE.setValue(movie.location, forKey: "location")
+        movieE.setValue(movie.yearRelease, forKey: "yearRelease")
          
     }
     

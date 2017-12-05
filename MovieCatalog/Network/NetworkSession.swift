@@ -10,7 +10,7 @@ import UIKit
 
 
 
-class NewtworkSession: NSObject {
+class NetworkSession: NSObject {
 
     var dataArray = Array<Any>()
     var dataArrayOnlyMovieNames = Array<Any>()

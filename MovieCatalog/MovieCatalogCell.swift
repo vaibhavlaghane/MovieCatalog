@@ -11,7 +11,7 @@ import UIKit
 class MovieCatalogCell: UITableViewCell {
     @IBOutlet weak var location: UILabel!
     
-    @IBOutlet weak var cellLabel: UILabel!
+    //@IBOutlet weak var cellLabel: UILabel!
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

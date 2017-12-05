@@ -17,4 +17,6 @@ struct  Constants {
     static let zip      =       ", 94120"
     static let notificationDataDownload = "NotificationDataDownload"
     static let notificationCoreDataUpdated = "NotificationCoreDataUpdated"
+    let url = "https://data.sfgov.org/api/views/yitu-d5am/rows.json?accessType=DOWNLOAD"
+
 }
