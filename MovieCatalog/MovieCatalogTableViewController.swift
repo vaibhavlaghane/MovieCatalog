@@ -11,7 +11,7 @@ import CoreData
 
 let url = "https://data.sfgov.org/api/views/yitu-d5am/rows.json?accessType=DOWNLOAD"
 
-class MovieCatalogTableViewController: UITableViewController {
+class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsControllerDelegate {
  
     var catalogArray = Array<Any>()
     let urlsession = NewtworkSession()
@@ -19,13 +19,16 @@ class MovieCatalogTableViewController: UITableViewController {
     var fetchedResultsController: NSFetchedResultsController<NSFetchRequestResult>!
     
     func initializeFetchedResultsController() {
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Person")
-        let departmentSort = NSSortDescriptor(key: "department.name", ascending: true)
-        let lastNameSort = NSSortDescriptor(key: "lastName", ascending: true)
-        request.sortDescriptors = [departmentSort, lastNameSort]
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: movieEntity)
+        let movieName = NSSortDescriptor(key: "movieName", ascending: true)
+        //let lastNameSort = NSSortDescriptor(key: "lastName", ascending: true)
+        request.sortDescriptors = [movieName]
         
-        let moc =  CoreDataManager.sharedInstance.persistentContainer.newBackgroundContext()// .managedObjectContext
-        fetchedResultsController = NSFetchedResultsController(fetchRequest: request, managedObjectContext: moc, sectionNameKeyPath: nil, cacheName: nil)
+        let moc =  CoreDataManager.sharedInstance.persistentContainer.viewContext//newBackgroundContext()// .managedObjectContext
+        let privateMOC = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        privateMOC.parent  = moc
+        
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: request, managedObjectContext: privateMOC, sectionNameKeyPath: nil, cacheName: nil)
         fetchedResultsController.delegate = self as? NSFetchedResultsControllerDelegate
         
         do {
@@ -34,13 +37,16 @@ class MovieCatalogTableViewController: UITableViewController {
             fatalError("Failed to initialize FetchedResultsController: \(error)")
         }
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        initializeFetchedResultsController()
+        
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(updateDataCatalog),
-            name: NSNotification.Name(rawValue: notificationDataDownload),
+            name: NSNotification.Name(rawValue: Constants.notificationCoreDataUpdated),
             object: nil)
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -54,6 +60,12 @@ class MovieCatalogTableViewController: UITableViewController {
     
     @objc func updateDataCatalog(){
         catalogArray = urlsession.dataArray
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            fatalError("Failed to initialize FetchedResultsController: \(error)")
+        }
+        
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
@@ -73,8 +85,8 @@ class MovieCatalogTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        let size = catalogArray.count
-        return size
+        let size =  self.fetchedResultsController.fetchedObjects?.count //catalogArray.count
+        return size!
     }
  
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -86,11 +98,15 @@ class MovieCatalogTableViewController: UITableViewController {
     }
    
     func processCell(index: Int, cell: MovieCatalogCell){
-        if (catalogArray.count > 0 && index < catalogArray.count){
+ 
+        if self.fetchedResultsController.fetchedObjects!.count > 0{
+       // if (catalogArray.count > 0 && index < catalogArray.count){
             
-            let catalogDetails = catalogArray[index] as! Array<Any>
-            let movieName = catalogDetails[8] as? String
-            let location = catalogDetails[10] as? String
+            catalogArray = self.fetchedResultsController.fetchedObjects!
+            var  catalogDetails = catalogArray[index] as! MovieDetails//as! Array<Any>
+            //catalogDetails = self.fetchedResultsController[index]
+            let movieName = catalogDetails.movieName// ["movieName" ]//  catalogDetails[8] as? String
+            let location = catalogDetails.location//["location"]//[10] as? String
             
             if(movieName != nil &&  !(movieName?.isEmpty)! ){
                 cell.cellLabel.text = movieName
@@ -99,10 +115,27 @@ class MovieCatalogTableViewController: UITableViewController {
                  cell.location.text = location
             }
         }
-        
-        
     }
   
+     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        self.tableView.reloadData()
+    }
+//    - (void)controller:(NSFetchedResultsController *)controller didChangeObject:(id)anObject atIndexPath:(nullable NSIndexPath *)indexPath forChangeType:(NSFetchedResultsChangeType)type newIndexPath:(nullable NSIndexPath *)newIndexPath;
+//
+//    func controllerdid
+    
+//
+//    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+//        return fetchedResultsController.sections!.count
+//    }
+//
+//    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        guard let sections = fetchedResultsController.sections else {
+//            fatalError("No sections in fetchedResultsController")
+//        }
+//        let sectionInfo = sections[section]
+//        return sectionInfo.numberOfObjects
+//    }
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation

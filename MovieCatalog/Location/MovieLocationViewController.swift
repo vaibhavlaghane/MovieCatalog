@@ -46,7 +46,7 @@ class MovieLocationViewController: UIViewController {
     
     func setLocation(){
         
-        let location = locationAddress + Constants.city + Constants.state + Constants.zip// ", San Francisco" + ",CA" + ", 94120"
+        let location = locationAddress + Constants.city + Constants.state + Constants.zip 
         let geocoder = CLGeocoder()
         geocoder.geocodeAddressString(location) { [weak self] placemarks, error in
             if let placemark = placemarks?.first, let location = placemark.location {

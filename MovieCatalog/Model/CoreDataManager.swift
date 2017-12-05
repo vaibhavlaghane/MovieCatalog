@@ -13,6 +13,7 @@ let coreDataModel = "MovieCatalogCoreData"
 let sqliteFile = "MovieCatalogCoreData"
 let movieEntity = "MovieDetails"
 
+//Class to pass movie object around
 class   MovieCatalog: NSObject {
     
     public var city: String? = ""
@@ -30,43 +31,61 @@ class   MovieCatalog: NSObject {
 class CoreDataManager: NSObject {
 
     static let sharedInstance = CoreDataManager()
-
+    
     @objc func updateCoreData( inpData:Array<Any>){
         
         if (  inpData.count == 0) { return }
+        let context = persistentContainer.viewContext
+        let privateMOC = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        privateMOC.parent  = persistentContainer.viewContext
         
-        for (_, element ) in inpData.enumerated() {
+        privateMOC.perform {
+            for (_, element ) in inpData.enumerated() {
+                
+                let movie = MovieCatalog()
+                let catalogDetails = element  as! Array<Any>
+                let location = catalogDetails[10] as? String
+                
+                if let id = catalogDetails[1] as? String, let movieName = catalogDetails[8] as? String
+                {
+                    movie.id = id
+                    movie.movieName = movieName
+                    movie.location = location ?? ""
+                    self.saveEntity(movie: movie, context:privateMOC)
+                }
+            }
             
-            let movie = MovieCatalog()
-            let catalogDetails = element  as! Array<Any>
-            let location = catalogDetails[10] as? String
-            
-            if let id = catalogDetails[1] as? String, let movieName = catalogDetails[8] as? String
-            {
-                movie.id = id
-                movie.movieName = movieName
-                movie.location = location ?? ""
-                saveEntity(movie: movie)
+            do {
+                try privateMOC.save()
+                context.performAndWait {
+                    do {
+                        try context.save()
+                    } catch {
+                        fatalError("Failure to save Main context: \(error)")
+                    }
+                }
+            } catch {
+                fatalError("Failure to save Private context: \(error)")
             }
         }
-        
-        
         
         saveContext()
     }
     
     
-    func saveEntity(movie: MovieCatalog){
+    func saveEntity(movie: MovieCatalog, context: NSManagedObjectContext){
         
-        let data = fetchData(movieID: movie.id!) as! Array<MovieDetails >
+        let data = fetchData(movieID: movie.id!, context: context) as! Array<MovieDetails >
         
         if data.count > 0{ 
             for (_, element) in data.enumerated() {
-            persistentContainer.viewContext.delete(element)
+            //context.delete(element)
+                delete(element: element, object: context)
+//                persistentContainer.viewContext.delete(element)
             }
         }
         
-        let context =  self.persistentContainer.viewContext
+        //let context =  self.persistentContainer.viewContext
         //    Now let’s create an entity and new user records.
         let entity = NSEntityDescription.entity(forEntityName: movieEntity, in: context)
         let movieE = NSManagedObject(entity: entity!, insertInto: context)
@@ -80,14 +99,14 @@ class CoreDataManager: NSObject {
          
     }
     
-    func fetchData(movieName: String )->Array<Any>{
+    func fetchData(movieName: String , context: NSManagedObjectContext )->Array<Any>{
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: movieEntity)
         request.predicate = NSPredicate(format: "movieName = %@", movieName)
         request.returnsObjectsAsFaults = false
         var result = Array<Any>()
         
         do {
-             result = try self.persistentContainer.viewContext.fetch(request)
+             result = try context.fetch(request) //self.persistentContainer.viewContext.fetch(request)
             for data in result as! [NSManagedObject] {
                 print(data.value(forKey: "movieName") as! String)
             }
@@ -97,14 +116,14 @@ class CoreDataManager: NSObject {
         return result
     }
     
-    func fetchData(movieID: String )->Array<Any>{
+    func fetchData(movieID: String, context: NSManagedObjectContext )->Array<Any>{
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: movieEntity)
         request.predicate = NSPredicate(format: "id = %@", movieID)
         request.returnsObjectsAsFaults = false
         var result = Array<Any>()
         
         do {
-            result = try self.persistentContainer.viewContext.fetch(request)
+            result = try context.fetch(request) //self.persistentContainer.viewContext.fetch(request)
             for data in result as! [NSManagedObject] {
                 print(data.value(forKey: "movieName") as! String)
             }
@@ -167,6 +186,8 @@ class CoreDataManager: NSObject {
     // MARK: - Core Data Saving support
     
     
+    // MARK: - Core Data Saving support
+    
     func saveContext () {
         let context = persistentContainer.viewContext
         if context.hasChanges {
@@ -179,38 +200,46 @@ class CoreDataManager: NSObject {
                 fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
             }
         }
+        
+         NotificationCenter.default.post(name: Notification.Name(Constants.notificationCoreDataUpdated), object: nil, userInfo: nil )
     }
+
     
-    
-    func updateEntity(){
-        var context:NSManagedObjectContext = persistentContainer.viewContext// .managedObjectContext!
+    func delete(element: NSManagedObject , object: NSManagedObjectContext?) {
+        guard let context = object else { return }
         
-        var en = NSEntityDescription.entity(forEntityName: movieEntity, in: context)//("ENTITIES_NAME", inManagedObjectContext: context)
-        
-        let batchUpdateRequest = NSBatchUpdateRequest(entity: en!)
-        batchUpdateRequest.resultType = NSBatchUpdateRequestResultType.updatedObjectIDsResultType
-        batchUpdateRequest.propertiesToUpdate = ["OBJECT_KEY": "NEWVALUE"]
-        batchUpdateRequest.propertiesToUpdate = ["OBJECT_KEY": "NEWVALUE"]
-        batchUpdateRequest.propertiesToUpdate = ["OBJECT_KEY": "NEWVALUE"]
-        batchUpdateRequest.propertiesToUpdate = ["OBJECT_KEY": "NEWVALUE"]
-        batchUpdateRequest.propertiesToUpdate = ["OBJECT_KEY": "NEWVALUE"]
-        batchUpdateRequest.propertiesToUpdate = ["OBJECT_KEY": "NEWVALUE"]
-        batchUpdateRequest.propertiesToUpdate = ["OBJECT_KEY": "NEWVALUE"]
-        
-        //var batchUpdateRequestError: NSError?
-        //
-        do {
-            _ = try context.execute(batchUpdateRequest)
+        if context == persistentContainer.viewContext {
+            context.delete(element)
+        } else {
             
-        } catch {
-            print("Failed")
+            do {
+                if element.managedObjectContext == context{
+               let exists =  try   context.existingObject(with: element.objectID)
+                if exists != nil  {context.delete(element)}
+                }
+            } catch {
+                
+            }
+           // [childContext existingObjectWithID:project.objectID error:&error], @"");
+          persistentContainer.performBackgroundTask { context in
+                do {
+                    if element.managedObjectContext == context{
+                    let exists = try   context.existingObject(with: element.objectID)
+                    if exists != nil  {context.delete(element)}
+                    
+                    }
+                } catch {
+                
+                }
+                //context.delete(element)
+            }
         }
         
-        //        context.executeRequest(batchUpdateRequest, error:&batchUpdateRequestError)
-        //        if let error = batchUpdateRequestError {println("error")}
-        //
-        
+        try? persistentContainer.viewContext.save()
     }
+    
+    
+ 
     
 }
 

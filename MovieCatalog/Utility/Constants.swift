@@ -14,5 +14,6 @@ struct  Constants {
     static let city     = ", San Francisco"
     static let state    =      ",CA"
     static let zip      =       ", 94120"
-    
+    static let notificationDataDownload = "NotificationDataDownload"
+    static let notificationCoreDataUpdated = "NotificationCoreDataUpdated"
 }

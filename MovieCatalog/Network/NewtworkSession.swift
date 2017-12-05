@@ -8,7 +8,7 @@
 
 import UIKit
 
-let notificationDataDownload = "NotificationDataDownload"
+
 
 class NewtworkSession: NSObject {
 
@@ -68,7 +68,7 @@ class NewtworkSession: NSObject {
                 // Something went wrong
                 print("JSON could not be parsed")
             }
-            NotificationCenter.default.post(name: Notification.Name(notificationDataDownload), object: nil, userInfo: ["JSONArray": self.dataArray] )
+            NotificationCenter.default.post(name: Notification.Name(Constants.notificationDataDownload), object: nil, userInfo: ["JSONArray": self.dataArray] )
         }
         
         task.resume()
