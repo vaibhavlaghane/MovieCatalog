@@ -8,16 +8,12 @@
 
 import UIKit
 
-
-
 class NetworkSession: NSObject {
 
     var dataArray = Array<Any>()
     var dataArrayOnlyMovieNames = Array<Any>()
     var movieLocationDictionary = Dictionary<String, Array<String>>()
     
- 
-
     func dataRequest(urltoRequest:String)
     {
         let url:URL = URL(string: urltoRequest)!
@@ -33,6 +29,9 @@ class NetworkSession: NSObject {
             
             guard let _:Data = data, let _:URLResponse = response, error == nil else {
                 print("error")
+                Utility.showAlertMessage("Failed to Download the Content", withTitle: "Download Update", onClick: {
+                    //
+                })
                 return
             }
             
@@ -56,14 +55,9 @@ class NetworkSession: NSObject {
                 for (_, element ) in (dArr.enumerated()){
                     self.dataArray.append(element)
                 }
-//                var lastElement = self.dataArray[0]
-//                for (index, element) in (self.dataArray.enumerated()){
-//                    if let movieName= 
-//                    self.movieLocationDictionary.[element[]]
-//                    
-//                }
-                
+ 
                 CoreDataManager.sharedInstance.updateCoreData(inpData: self.dataArray) //
+ 
             } catch {
                 // Something went wrong
                 print("JSON could not be parsed")

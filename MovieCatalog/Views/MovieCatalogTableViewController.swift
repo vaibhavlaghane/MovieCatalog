@@ -18,6 +18,9 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
             processMovieList(inArr:catalogArray)
         }
     }
+    var flagHideLoadingView         = true
+    var loadingView:LoadingView     = LoadingView()
+    
     let urlsession          = NetworkSession()
     var fetchDataArray      = Array<Any >()
     let context             = CoreDataManager.sharedInstance.persistentContainer.viewContext
@@ -48,6 +51,7 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
         super.viewDidLoad()
 
         initializeFetchedResultsController()
+        setupLoadingIndicator(start:  true )
         
         NotificationCenter.default.addObserver(
             self,
@@ -69,7 +73,9 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         //return 1
-        
+        if movieDArray.count > 0{
+            setupLoadingIndicator(start: false)
+        }
          return movieDArray.count//movieDict.count
     }
 
@@ -250,5 +256,37 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
             
     }
  
+    
+    func setupLoadingIndicator(start: Bool ){
+        if(start){
+            var flagSubviewPresent = false
+            
+            for view in self.view.subviews{
+                if view === self.loadingView {
+                    DispatchQueue.main.async {
+                        self.loadingView.isHidden = false
+                        self.flagHideLoadingView = false
+                    }
+                    flagSubviewPresent = true
+                    break
+                }
+            }
+            if(!flagSubviewPresent ){
+                self.loadingView = LoadingView(frame: self.view.frame)
+                self.view.addSubview(self.loadingView)
+                DispatchQueue.main.async {
+                    self.loadingView.isHidden = false
+                    self.flagHideLoadingView = false
+                }
+            }
+        }
+        else if(!start ){
+            DispatchQueue.main.async {
+                self.loadingView.stopSpinner()
+                self.loadingView.isHidden  = true
+                self.flagHideLoadingView = true
+            }
+        }
+    }
 
 }
