@@ -29,18 +29,7 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
 
     
     @IBAction func sortButtonClicked(_ sender: Any) {
-        let   tempA = catalogArray as? [MovieDetails]
-        var tempB = Array<MovieDetails>()
-        
-        if tempA != nil && tempA?.count != 0 {
-            for (index, element ) in (tempA?.enumerated())! {
-                
-                if (tempA?.count)! > index {
-                    if element.movieName != nil{
-                        tempB.append(element)
-                    }
-                }
-            }
+     
             if(sortOrder){
                 movieDArray.sort()
                 sortOrder = false
@@ -52,7 +41,7 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
-        }
+        
     }
     
     override func viewDidLoad() {
@@ -105,7 +94,7 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         
         if let date =  movieDateDict[movieDArray[section]] as? String{
-            return movieDArray[section] + "  Date:" + date
+            return movieDArray[section] + "," + "  Date:" + date
         }else {return movieDArray[section]
             
         }
@@ -132,36 +121,7 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
         
     }
     
-    func processCell(index: Int, cell: MovieCatalogCell){
-  
-        var  movieName = ""
-        var  location = ""
-        
-        catalogArray = self.fetchedResultsController.fetchedObjects!
-            if catalogArray.count == 0 {
-                catalogArray = fetchDataArray
-            }
-            if catalogArray.count == 0{
-                catalogArray = urlsession.dataArray
-            }
-        
-        if  let  catalogDetails = catalogArray[index] as? MovieDetails{
-            if let  movie  = catalogDetails.movieName {movieName = movie }
-            if let locate = catalogDetails.location { location = locate}
-        }
-        if let catalogDetails = catalogArray[index] as? Array<Any>
-        {
-            if let  movie   = (catalogDetails[8] as? String){movieName = movie }
-            if let locate =  (catalogDetails[10] as? String) { location = locate}
-        }
-        if(  !(movieName.isEmpty) ){
-                //cell.cellLabel.text = movieName
-            }
-        if(  !(location.isEmpty)){
-                 cell.location.text = location
-            }
-        
-    }
+ 
   
     //fetched results controller delegate
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
