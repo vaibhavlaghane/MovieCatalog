@@ -2,8 +2,6 @@
 
 Assumptions :
 1 - the url API provides data for San Francisco City listing the locations of the movies.
-zip code for the locations is not directly accessible hence "94120" is created as generic zip.
-[ the location map hence is not accurate sometimes ]
 
 2 - The API doesn't need auth token.
 

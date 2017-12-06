@@ -14,6 +14,8 @@ class MovieLocationViewController: UIViewController {
 
     public var titleLabel = "MovieTitle"
     public var locationAddress = "Address"
+    var lat : Double = 0
+    var long :Double = 0 
     
     @IBOutlet weak var mapV: MKMapView!
     @IBAction func backClicked(_ sender: Any) {
@@ -35,13 +37,13 @@ class MovieLocationViewController: UIViewController {
     
  
     func setLocation(){
-        
-        let location = locationAddress + Constants.city + Constants.state + Constants.zip 
+
+        let location = locationAddress + Constants.city + Constants.state //+ Constants.zip
         let geocoder = CLGeocoder()
         geocoder.geocodeAddressString(location) { [weak self] placemarks, error in
             if let placemark = placemarks?.first, let location = placemark.location {
                 let mark = MKPlacemark(placemark: placemark)
-                
+
                 if var region = self?.mapV.region {
                     region.center = location.coordinate
                     region.span.longitudeDelta /= 8.0
@@ -51,6 +53,45 @@ class MovieLocationViewController: UIViewController {
                 }
             }
         }
+    }
+    
+        /*
+        func setLocation(){
+            let location = locationAddress + Constants.city + Constants.state //+ Constants.zip
+            let geocoder = CLGeocoder()
+            geocoder.geocodeAddressString((location), completionHandler: {(placemarks, error) -> Void in
+                
+                if let placemark = placemarks?.first {
+                    let coordinates:CLLocationCoordinate2D = placemark.location!.coordinate
+                    coordinates.latitude
+                    coordinates.longitude
+                    
+                    
+                    self.lat = coordinates.latitude
+                    self.long = coordinates.longitude
+                    print("lat \(self.lat)")
+                    print("long \(self.long)")
+                }
+            })
+        }
+    */
+    
+//    func  setLocation(){
+//        let location = locationAddress + Constants.city + Constants.state //+ Constants.zip
+//        let geocoder = CLGeocoder()
+//
+//
+//    geocoder.geocodeAddressString(location, completionHandler: {(placemarks, error) -> Void in
+//    if((error) != nil){
+//    print("Error", error)
+//    }
+//    if let placemark = placemarks?.first {
+//    let coordinates:CLLocationCoordinate2D = placemark.location!.coordinate
+//    self.mapV.addAnnotation(MKPlacemark(placemark: placemark))
+//        }
+//    })
+//
+//    }
         
         /*
          
@@ -76,7 +117,7 @@ class MovieLocationViewController: UIViewController {
          
  
  */
-    }
+    //}
   
 }
 
