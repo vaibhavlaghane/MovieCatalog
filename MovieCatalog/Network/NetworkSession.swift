@@ -36,7 +36,7 @@ class NetworkSession: NSObject {
             }
             
             let dataString = NSString(data: data!, encoding: String.Encoding.utf8.rawValue)
-            print(dataString ?? "default string if string empty")
+            //print(dataString ?? "default string if string empty")
             
             
             do {
@@ -46,10 +46,10 @@ class NetworkSession: NSObject {
                 
                 let meta = json["meta"]
                 let metaArr = meta as?  Array<Any >
-                print(metaArr ?? "metaArr empty ")
+                //print(metaArr ?? "metaArr empty ")
                 let data = json["data"] //as! Array<Dictionary>
                 let dataArr = data as? Array<Any>
-                print(dataArr ?? "dataArr empty ")
+                //print(dataArr ?? "dataArr empty ")
                 guard let dArr = dataArr else{return}
                
                 for (_, element ) in (dArr.enumerated()){

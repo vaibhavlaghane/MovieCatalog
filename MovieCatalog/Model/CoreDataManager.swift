@@ -112,7 +112,7 @@ class CoreDataManager: NSObject {
         do {
              result = try context.fetch(request) //self.persistentContainer.viewContext.fetch(request)
             for data in result as! [NSManagedObject] {
-                print(data.value(forKey: "movieName") as! String)
+               // print(data.value(forKey: "movieName") as! String)
             }
         } catch {
             print("Failed")
@@ -129,7 +129,7 @@ class CoreDataManager: NSObject {
         do {
             result = try context.fetch(request) //self.persistentContainer.viewContext.fetch(request)
             for data in result as! [NSManagedObject] {
-                print(data.value(forKey: "movieName") as! String)
+                //print(data.value(forKey: "movieName") as! String)
             }
         } catch {
             print("Failed")
@@ -146,7 +146,7 @@ class CoreDataManager: NSObject {
         do {
             result = try self.persistentContainer.viewContext.fetch(request)
             for data in result as! [NSManagedObject] {
-                print(data.value(forKey: "movieName") as! String)
+               // print(data.value(forKey: "movieName") as! String)
             }
         } catch {
             print("Failed")

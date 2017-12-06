@@ -52,6 +52,7 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
 
         initializeFetchedResultsController()
         setupLoadingIndicator(start:  true )
+        updateDataCatalog()
         
         NotificationCenter.default.addObserver(
             self,
@@ -101,7 +102,8 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
         
         if let date =  movieDateDict[movieDArray[section]] as? String{
             return movieDArray[section] + "," + "  Date:" + date
-        }else {return movieDArray[section]
+        }else {
+            return movieDArray[section]
             
         }
         
@@ -127,8 +129,6 @@ class MovieCatalogTableViewController: UITableViewController, NSFetchedResultsCo
         
     }
     
- 
-  
     //fetched results controller delegate
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         self.tableView.reloadData()
